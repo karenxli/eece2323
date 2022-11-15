@@ -311,19 +311,14 @@ module ControlUnit(input logic[6:0] opcode,
             
             // slli
             7'h13: begin
-                //imm_src = 2'b00;
-				//reg_write = 1;
-				//alu_src = 1;
-				alu_op = 4'b1000;
-				//branch = 0;
-				//mem_write = 0;
-				//result_src = 1;
-				
+                imm_src = 2'b00;
 				reg_write = 1;
-				alu_src = 0;
+				alu_src = 1;
+				alu_op = 4'b1000;
 				branch = 0;
 				mem_write = 0;
-				result_src = 0;
+				result_src = 0; // alu applied 
+
 				$display("\tInstruction 'slli'");
             end
             
@@ -399,20 +394,6 @@ module InstructionMemory(input logic clock,
 			for (i = 0; i < 256; i = i + 1)
 				content[i] = 0;
 
-			// Initial program in machine code
-			/*content[0] = 32'h002081B3;	// add x3, x1, x2  <- label 'main'
-			content[1] = 32'h402081B3;	// sub x3, x1, x2
-			content[2] = 32'h0020F1B3;	// and x3, x1, x2
-			content[3] = 32'h0020E1B3;	// or  x3, x1, x2
-			content[4] = 32'h0020A1B3;	// slt x3, x1, x2
-			content[5] = 32'h001121B3;	// slt x3, x2, x1
-			content[6] = 32'hFE0504E3;	// beq x10, x0, main
-			content[7] = 32'h00052183;	// lw  x3, 0(x10)
-			content[8] = 32'h00452183;	// lw  x3, 4(x10)
-			content[9] = 32'h00352423;	// sw  x3, 8(x10)
-			content[10] = 32'hFC000CE3;	// beq x0, x0, main
-			*/
-			
 			// Initial values
 			content[0] = 32'h002081B3;	// add x3, x1, x2  <- label 'main'
 			content[1] = 32'h402081B3;	// sub x3, x1, x2
@@ -533,44 +514,15 @@ module Alu(input logic[31:0] op1,
 
 	always_comb
 		case (f)
-			4'b0000: begin result = op1 & op2;
-			//$display("op1 = %x, op2 = %x", op1, op2);
-			//$display("result = %x", result);
-			end
-			4'b0001: begin result = op1 | op2;
-			//$display("op1 = %x, op2 = %x", op1, op2);
-			//$display("result = %x", result);
-			end
-			4'b0010: begin result = op1 + op2;
-			//$display("op1 = %x, op2 = %x", op1, op2);
-			//$display("result = %x", result);
-			end
-			4'b0011: begin result = 32'hxxxxxxxx;
-			//$display("op1 = %x, op2 = %x", op1, op2);
-			//$display("result = %x", result);
-			end
-			4'b0100: begin result = op1 & ~op2;
-			//$display("op1 = %x, op2 = %x", op1, op2);
-			//$display("result = %x", result);
-			end
-			4'b0101: begin result = op1 | ~op2;
-			//$display("op1 = %x, op2 = %x", op1, op2);
-			//$display("result = %x", result);
-			end
-			4'b0110: begin result = op1 - op2;
-			//$display("op1 = %x, op2 = %x", op1, op2);
-			//$display("result = %x", result);
-			end
-			4'b0111: begin
-			     result = op1 < op2;
-			     //$display("op1 = %x, op2 = %x", op1, op2);
-			     //$display("result = %x", result);
-			  end
-			4'b1000: begin
-			  $display("op1 = %x, op2 = %x", op1, op2);
-			  result = op1 << op2[4:0];
-			  $display("result = %x", result);
-			  end
+			4'b0000: result = op1 & op2;
+			4'b0001: result = op1 | op2;
+			4'b0010: result = op1 + op2;
+			4'b0011: result = 32'hxxxxxxxx;
+			4'b0100: result = op1 & ~op2;
+			4'b0101: result = op1 | ~op2;
+			4'b0110: result = op1 - op2;
+			4'b0111: result = op1 < op2;
+			4'b1000: result = op1 << op2[4:0];
 		endcase
 	
 	assign zero = result == 0;
